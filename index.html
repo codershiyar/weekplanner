@@ -1,0 +1,1481 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Weekplanner</title>
+<meta name="description" content="Een simpele weekplanner voor werk, leren, sport en vrije tijd. Werkt in je browser, zonder account.">
+<meta name="theme-color" content="#FCFCFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E0E12" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF5A5A'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap">
+<style>
+:root {
+  --bg: #FCFCFF; --fill: #F3F3F8; --surface: #FFFFFF; --ink: #16161D; --muted: #6B6B78; --line: #E7E7EC;
+  --accent: #FF5A5A; --accent-hover: #F04A4A; --accent-ink: #FFFFFF; --accent-soft: #FFEDED;
+  --warn: #C2410C; --warn-bg: #FFF1E8;
+  --c-slate: #55648A; --c-slate-bg: #EEF1F7;
+  --c-teal: #0B8478; --c-teal-bg: #E0F4F1;
+  --c-green: #3F8519; --c-green-bg: #E8F4DD;
+  --c-violet: #7048D0; --c-violet-bg: #F0EAFD;
+  --c-yellow: #9A6205; --c-yellow-bg: #FDF2D8;
+  --c-blue: #1F6FC9; --c-blue-bg: #E3EFFC;
+  --c-pink: #C0367A; --c-pink-bg: #FCE7F1;
+  --c-orange: #B4530F; --c-orange-bg: #FDEBDD;
+  --c-grey: #5C5C69; --c-grey-bg: #EFEFF3;
+  --shadow: 0 1px 2px rgba(22,22,29,.04), 0 4px 16px rgba(22,22,29,.05);
+  --font: "Geist", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0E0E12; --fill: #101015; --surface: #17171D; --ink: #EDEDF2; --muted: #9A9AA8; --line: #2A2A33;
+    --accent-hover: #FF6E6E; --accent-soft: #3A1B1D;
+    --warn: #FB923C; --warn-bg: #36200F;
+    --c-slate: #AAB6D4; --c-slate-bg: #1E2332; --c-teal: #4FD1C3; --c-teal-bg: #0F2E2A;
+    --c-green: #9AD66A; --c-green-bg: #1A2B12; --c-violet: #B9A0FF; --c-violet-bg: #251C3F;
+    --c-yellow: #F3C452; --c-yellow-bg: #31270F; --c-blue: #7DB6F5; --c-blue-bg: #132538;
+    --c-pink: #F08BBE; --c-pink-bg: #3A1828; --c-orange: #F7A35C; --c-orange-bg: #38220F;
+    --c-grey: #B4B4C2; --c-grey-bg: #24242C; --shadow: none;
+    color-scheme: dark;
+  }
+}
+.col-slate { --cf: var(--c-slate); --cb: var(--c-slate-bg); }
+.col-teal { --cf: var(--c-teal); --cb: var(--c-teal-bg); }
+.col-green { --cf: var(--c-green); --cb: var(--c-green-bg); }
+.col-violet { --cf: var(--c-violet); --cb: var(--c-violet-bg); }
+.col-yellow { --cf: var(--c-yellow); --cb: var(--c-yellow-bg); }
+.col-blue { --cf: var(--c-blue); --cb: var(--c-blue-bg); }
+.col-pink { --cf: var(--c-pink); --cb: var(--c-pink-bg); }
+.col-orange { --cf: var(--c-orange); --cb: var(--c-orange-bg); }
+.col-grey { --cf: var(--c-grey); --cb: var(--c-grey-bg); }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+[hidden] { display: none !important; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+.wrap { max-width: 1500px; margin: 0 auto; padding: 24px max(16px, env(safe-area-inset-right)) 56px max(16px, env(safe-area-inset-left)); display: grid; gap: 20px; }
+
+/* Header */
+.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px; }
+h1 { font-weight: 700; font-size: clamp(28px, 4.5vw, 40px); line-height: 1.05; letter-spacing: -.03em; margin: 0 0 4px; }
+.sub-h { font-size: 14px; color: var(--muted); font-weight: 500; }
+.nav { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.seg { display: flex; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 3px; gap: 2px; }
+.seg button { border: none; background: transparent; border-radius: 9px; padding: 7px 10px; display: grid; place-items: center; font-weight: 500; }
+.seg button:hover { background: var(--fill); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 9px 15px; font-weight: 600; display: inline-flex; align-items: center; gap: 7px; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.btn.soft { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+.btn.danger { color: var(--warn); }
+.btn.danger.armed { background: var(--warn); color: var(--surface); border-color: var(--warn); }
+.welcome .group { display: flex; gap: 8px; flex-wrap: wrap; }
+.welcome { background: var(--accent-soft); border-radius: 14px; padding: 12px 16px; font-size: 14px; display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+
+/* Goals */
+.goals { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
+.goal { background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: 16px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.goal .lbl { font-size: 13px; color: var(--muted); font-weight: 500; display: flex; align-items: center; gap: 7px; }
+.goal .val { font-weight: 700; font-size: 22px; line-height: 1.1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.goal .sub { font-size: 13px; color: var(--muted); }
+.cdot { width: 10px; height: 10px; border-radius: 50%; background: var(--cf); flex: none; }
+.dots { display: flex; gap: 6px; flex-wrap: wrap; color: var(--cf); }
+.dot { width: 12px; height: 12px; border-radius: 50%; background: var(--line); }
+.dot.plan { background: transparent; box-shadow: inset 0 0 0 2px currentColor; }
+.dot.done { background: currentColor; }
+.parts { display: flex; flex-wrap: wrap; gap: 6px; }
+.part { font-size: 12px; font-weight: 500; padding: 3px 9px; border-radius: 999px; background: var(--cb); color: var(--cf); font-variant-numeric: tabular-nums; }
+.part.next { background: var(--cf); color: var(--surface); }
+.progress { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.progress > span { display: block; height: 100%; background: var(--accent); border-radius: 99px; }
+
+/* Week */
+.week { display: grid; gap: 12px; grid-template-columns: 1fr; }
+@media (min-width: 640px) { .week { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .week { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
+.day { background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: 18px; padding: 14px 12px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.day.today { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), var(--shadow); }
+.day.past { opacity: .6; }
+.day.drop { border-color: var(--accent); background: var(--accent-soft); }
+.dhead { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.dnum { font-weight: 700; font-size: 26px; line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.day.today .dnum { color: var(--accent); }
+.dname { font-size: 13px; color: var(--muted); font-weight: 500; margin-top: 3px; }
+.tag-today { font-size: 11px; font-weight: 600; background: var(--accent); color: var(--accent-ink); border-radius: 999px; padding: 2px 8px; margin-left: 6px; }
+.add { border: none; background: var(--fill); color: var(--muted); border-radius: 10px; width: 32px; height: 32px; display: grid; place-items: center; flex: none; }
+.add:hover { background: var(--accent-soft); color: var(--accent); }
+.list { display: grid; gap: 8px; }
+.empty { font-size: 13px; color: var(--muted); padding: 4px 0; }
+.note-btn { font-size: 12px; color: var(--muted); margin-top: auto; padding: 10px 6px 2px; border: none; border-top: 1px solid var(--line); background: transparent; text-align: left; width: 100%; display: flex; gap: 6px; align-items: flex-start; justify-content: space-between; cursor: text; }
+.note-btn svg.i { width: 13px; height: 13px; opacity: 0; margin-top: 2px; }
+.note-btn:hover { color: var(--ink); }
+.note-btn:hover svg.i, .note-btn:focus-visible svg.i { opacity: .7; }
+.note-btn.empty-note { font-style: italic; opacity: .75; }
+.note-input { margin-top: auto; font-size: 12px; padding: 7px 9px; border: 1px solid var(--accent); border-radius: 8px; background: var(--fill); width: 100%; box-shadow: 0 0 0 3px var(--accent-soft); outline: none; }
+
+.task { display: flex; gap: 8px; align-items: flex-start; }
+.task.dragging { opacity: .35; }
+.card { border-radius: 12px; padding: 10px 11px; display: grid; gap: 4px; text-align: left; border: none; width: 100%; min-width: 0; background: var(--cb); }
+.card .cat { color: var(--cf); font-size: 12px; font-weight: 600; }
+.card-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; }
+.time { font-family: var(--mono); font-size: 12px; font-variant-numeric: tabular-nums; color: var(--muted); }
+.title { font-weight: 600; font-size: 14px; line-height: 1.3; overflow-wrap: anywhere; }
+.title.is-done { text-decoration: line-through; opacity: .55; }
+.tip { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.badges { display: flex; flex-wrap: wrap; gap: 4px; }
+.badge { font-size: 11px; font-weight: 500; color: var(--muted); background: var(--surface); border-radius: 999px; padding: 1px 7px; }
+.warn { font-size: 11px; font-weight: 600; color: var(--warn); background: var(--warn-bg); border: 1px solid var(--warn); border-radius: 999px; padding: 0 7px; }
+.check { appearance: none; -webkit-appearance: none; width: 20px; height: 20px; border: 2px solid var(--line); border-radius: 7px; flex: none; margin: 9px 0 0; display: grid; place-items: center; cursor: pointer; background: var(--surface); }
+.check:hover { border-color: var(--accent); }
+.check:checked { background: var(--accent); border-color: var(--accent); }
+.check:checked::after { content: ""; width: 5px; height: 9px; border: solid var(--accent-ink); border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px, -1px); }
+.grip { border: none; background: transparent; color: var(--muted); width: 22px; height: 30px; display: grid; place-items: center; cursor: grab; touch-action: none; flex: none; border-radius: 7px; margin-top: 4px; padding: 0; }
+.grip:hover { background: var(--fill); color: var(--ink); }
+.grip svg { width: 14px; height: 14px; fill: currentColor; }
+.ghost { position: fixed; pointer-events: none; z-index: 60; margin: 0; transform: rotate(2deg) scale(1.02); box-shadow: 0 12px 32px rgba(0,0,0,.22); opacity: .95; }
+body.is-dragging { user-select: none; -webkit-user-select: none; cursor: grabbing; }
+
+/* Panels */
+.panel { background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: 18px; padding: 18px; display: grid; gap: 14px; }
+.panel-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.panel-head h2 { font-size: 20px; font-weight: 700; letter-spacing: -.02em; margin: 0; }
+.hint { font-size: 13px; color: var(--muted); }
+.cat-list { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); }
+.cat-card { display: flex; gap: 10px; align-items: center; background: var(--fill); border: 1px solid transparent; border-radius: 12px; padding: 11px 13px; text-align: left; min-width: 0; }
+.cat-card:hover { border-color: var(--cf); }
+.cat-card .cdot { width: 14px; height: 14px; }
+.cat-card b { display: block; font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
+.cat-card .meta { display: block; font-size: 12px; color: var(--muted); }
+.cat-card svg.i { margin-left: auto; color: var(--muted); width: 16px; height: 16px; }
+.rule-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+.rule-list li { background: var(--fill); border-radius: 12px; padding: 12px 14px; font-size: 14px; color: var(--muted); min-width: 0; overflow-wrap: anywhere; }
+.rule-list li > strong:first-child { display: block; color: var(--ink); font-weight: 600; font-size: 15px; margin-bottom: 2px; }
+.rule-list strong { color: var(--ink); font-weight: 600; }
+.rule-form, .rule-rows { display: grid; gap: 12px; }
+.rule-row { display: grid; gap: 6px; grid-template-columns: 1fr auto; background: var(--fill); border-radius: 12px; padding: 10px; }
+.rule-row input { font-weight: 600; }
+.rule-row input, .rule-row textarea, #rule-heading { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; width: 100%; min-width: 0; }
+.rule-row textarea { grid-column: 1 / -1; resize: vertical; }
+.icon-btns { display: flex; gap: 2px; }
+.icon-btn { border: none; background: transparent; color: var(--muted); border-radius: 10px; width: 36px; height: 38px; display: grid; place-items: center; }
+.icon-btn:hover { color: var(--ink); background: var(--surface); }
+.icon-btn.del:hover { color: var(--warn); background: var(--warn-bg); }
+.rule-row:first-child [data-up], .rule-row:last-child [data-down], .slot-row:first-child [data-up], .slot-row:last-child [data-down] { opacity: .3; pointer-events: none; }
+.data-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.footer { text-align: center; font-size: 13px; color: var(--muted); }
+
+/* Dialogs */
+dialog { border: none; border-radius: 20px; padding: 0; background: var(--surface); color: var(--ink); width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 32px); box-shadow: 0 24px 64px rgba(0,0,0,.25); }
+dialog::backdrop { background: rgba(14,14,18,.5); backdrop-filter: blur(4px); }
+form.edit { display: grid; gap: 14px; padding: 22px; }
+form.edit h2 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; margin: 0; }
+form.edit h3 { font-size: 14px; font-weight: 600; margin: 6px 0 -4px; }
+.field { display: grid; gap: 6px; min-width: 0; }
+.field > label, .label { font-size: 13px; color: var(--muted); font-weight: 500; }
+.field input, .field select, .field textarea, .slot-row select, .slot-row input { background: var(--fill); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; min-width: 0; }
+.field input:focus, .field select:focus, .field textarea:focus, .rule-row input:focus, .rule-row textarea:focus, #rule-heading:focus, .slot-row select:focus, .slot-row input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.row { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+.inline { display: flex; gap: 8px; align-items: center; font-size: 14px; }
+.inline input[type=checkbox] { accent-color: var(--accent); width: 16px; height: 16px; flex: none; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: var(--fill); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 500; }
+.chip:hover { border-color: var(--accent); }
+.chip.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.swatch { position: relative; cursor: pointer; }
+.swatch input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.swatch span { display: block; width: 30px; height: 30px; border-radius: 50%; background: var(--cf); box-shadow: inset 0 0 0 3px var(--cb); }
+.swatch input:checked + span { outline: 2px solid var(--ink); outline-offset: 2px; }
+.swatch input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.slot-rows { display: grid; gap: 8px; }
+.slot-row { display: grid; grid-template-columns: minmax(0, 1fr) 110px auto; gap: 6px; align-items: center; }
+.slot-row select, .slot-row input { padding: 9px 10px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; padding-top: 6px; }
+.actions .group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 11px 18px; border-radius: 12px; font-size: 14px; font-weight: 500; max-width: calc(100vw - 32px); z-index: 70; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .card, .btn, .chip, .add, .cat-card { transition: filter .15s, background-color .15s, border-color .15s; }
+  .card:hover { filter: brightness(.97); }
+}
+
+/* Print: one A4 page in landscape */
+@page { size: A4 landscape; margin: 10mm; }
+body.printing { background: #fff; color: #16161D; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body.printing .wrap { width: 277mm; max-width: none; padding: 0; gap: 10px; }
+body.printing .nav, body.printing .welcome, body.printing #goals, body.printing #categories, body.printing #data,
+body.printing .footer, body.printing .add, body.printing .grip, body.printing .note-btn svg, body.printing .toast, body.printing dialog { display: none !important; }
+body.printing .week { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+body.printing .day, body.printing .panel { box-shadow: none; border-color: #DDDDE3; background: #fff; opacity: 1; padding: 8px; border-radius: 10px; }
+body.printing .day { min-height: 110mm; }
+body.printing .card { padding: 6px 7px; }
+body.printing .title { font-size: 11px; }
+body.printing .tip, body.printing .time, body.printing .card .cat, body.printing .badge { font-size: 9px; }
+body.printing .check { width: 14px; height: 14px; margin-top: 6px; border-color: #9A9AA8; }
+body.printing .panel h2 { font-size: 14px; }
+body.printing .rule-list { gap: 6px; }
+body.printing .rule-list li { font-size: 10px; padding: 6px 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1 id="week-number">Week</h1>
+      <div class="sub-h" id="week-range"></div>
+    </div>
+    <div class="nav">
+      <div class="seg" role="group" aria-label="Language">
+        <button type="button" data-lang="nl" aria-pressed="true">NL</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <div class="seg">
+        <button type="button" id="prev" data-i18n-aria="prevWeek"><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button type="button" id="today" data-i18n="today"></button>
+        <button type="button" id="next" data-i18n-aria="nextWeek"><svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
+      <button type="button" class="btn soft" id="auto-plan" data-i18n-title="autoPlanTitle"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg><span data-i18n="autoPlan"></span></button>
+      <button type="button" class="btn" id="print"><svg class="i" viewBox="0 0 24 24"><path d="M6 9V3h12v6"/><rect x="6" y="14" width="12" height="7" rx="1"/><path d="M6 18H4a1 1 0 01-1-1v-6a2 2 0 012-2h14a2 2 0 012 2v6a1 1 0 01-1 1h-2"/></svg><span data-i18n="print"></span></button>
+      <button type="button" class="btn primary" id="new-task"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="newTask"></span></button>
+    </div>
+  </header>
+
+  <div class="welcome" id="welcome" hidden>
+    <span data-i18n="welcome"></span>
+    <div class="group">
+      <button type="button" class="btn" id="clear-examples" data-i18n="clearExamples"></button>
+      <button type="button" class="btn" id="welcome-close" data-i18n="welcomeClose"></button>
+    </div>
+  </div>
+
+  <section class="goals" id="goals"></section>
+
+  <section class="week" id="week"></section>
+
+  <section class="panel" id="categories">
+    <div class="panel-head">
+      <div><h2 data-i18n="categories"></h2><div class="hint" data-i18n="categoriesHint"></div></div>
+      <button type="button" class="btn" id="new-cat"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="newCat"></span></button>
+    </div>
+    <div class="cat-list" id="cat-list"></div>
+  </section>
+
+  <section class="panel" id="rules">
+    <div class="panel-head">
+      <h2 id="rules-title"></h2>
+      <button type="button" class="btn" id="rules-edit"><svg class="i" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg><span data-i18n="edit"></span></button>
+    </div>
+    <div id="rules-view"></div>
+    <div class="rule-form" id="rules-form" hidden>
+      <div class="field"><label for="rule-heading" data-i18n="listTitle"></label><input id="rule-heading" type="text" maxlength="60"></div>
+      <div class="rule-rows" id="rule-rows"></div>
+      <div class="hint" data-i18n="boldHint"></div>
+      <div class="actions">
+        <button type="button" class="btn" id="rule-add"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="addRule"></span></button>
+        <div class="group">
+          <button type="button" class="btn" id="rules-cancel" data-i18n="cancel"></button>
+          <button type="button" class="btn primary" id="rules-save" data-i18n="save"></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="data">
+    <div class="panel-head">
+      <div><h2 data-i18n="yourData"></h2><div class="hint" data-i18n="dataHint"></div></div>
+    </div>
+    <div class="data-btns">
+      <button type="button" class="btn" id="export"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg><span data-i18n="exportData"></span></button>
+      <label class="btn" for="import-file"><svg class="i" viewBox="0 0 24 24"><path d="M12 21V9M7 14l5-5 5 5M5 3h14"/></svg><span data-i18n="importData"></span></label>
+      <input type="file" id="import-file" accept="application/json,.json" hidden>
+      <button type="button" class="btn danger" id="reset" data-i18n="reset"></button>
+    </div>
+  </section>
+
+  <p class="footer" data-i18n="footer"></p>
+</div>
+
+<dialog id="task-dialog">
+  <form class="edit" id="task-form" method="dialog">
+    <h2 id="task-dialog-title"></h2>
+    <div class="field">
+      <label for="f-cat" data-i18n="category"></label>
+      <select id="f-cat"></select>
+    </div>
+    <div class="field">
+      <label for="f-title" data-i18n="title"></label>
+      <input id="f-title" type="text" maxlength="80" data-i18n-ph="titlePh" required>
+    </div>
+    <div class="field" id="part-field">
+      <label for="f-part" id="part-label"></label>
+      <div class="inline">
+        <select id="f-part" style="flex:1"></select>
+        <button type="button" class="btn" id="part-switch" data-i18n="switch"></button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field"><label for="f-date" data-i18n="day"></label><input id="f-date" type="date" required></div>
+      <div class="field"><label for="f-start" data-i18n="from"></label><input id="f-start" type="time" value="09:00"></div>
+      <div class="field"><label for="f-end" data-i18n="to"></label><input id="f-end" type="time" value="10:00"></div>
+    </div>
+    <div class="field" id="length-field">
+      <span class="label" data-i18n="howLong"></span>
+      <div class="chips" id="lengths"></div>
+    </div>
+    <label class="inline"><input type="checkbox" id="f-allday"> <span data-i18n="allDay"></span></label>
+    <label class="inline"><input type="checkbox" id="f-repeat"> <span data-i18n="repeat"></span></label>
+    <div class="field"><label for="f-note" data-i18n="note"></label><textarea id="f-note" rows="2" maxlength="300"></textarea></div>
+    <div class="actions">
+      <div class="group">
+        <button type="button" class="btn danger" id="task-delete" hidden></button>
+        <button type="button" class="btn" id="task-skip" data-i18n="skipWeek" hidden></button>
+      </div>
+      <div class="group">
+        <button type="button" class="btn" id="task-cancel" data-i18n="cancel"></button>
+        <button type="submit" class="btn primary" data-i18n="save"></button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="cat-dialog">
+  <form class="edit" id="cat-form" method="dialog">
+    <h2 id="cat-dialog-title"></h2>
+    <div class="row">
+      <div class="field"><label for="c-name" data-i18n="catName"></label><input id="c-name" type="text" maxlength="30" data-i18n-ph="catNamePh" required></div>
+      <div class="field"><label for="c-title" data-i18n="catTitle"></label><input id="c-title" type="text" maxlength="60" data-i18n-ph="catTitlePh"></div>
+    </div>
+    <div class="field">
+      <span class="label" data-i18n="color"></span>
+      <div class="swatches" id="c-colors"></div>
+    </div>
+
+    <h3 data-i18n="goalHeading"></h3>
+    <div class="row">
+      <div class="field"><label for="c-min" data-i18n="goalMin"></label><input id="c-min" type="number" min="0" max="14" step="1"></div>
+      <div class="field"><label for="c-max" data-i18n="goalMax"></label><input id="c-max" type="number" min="0" max="14" step="1"></div>
+      <div class="field"><label for="c-length" data-i18n="catLength"></label><input id="c-length" type="number" min="5" max="900" step="5"></div>
+    </div>
+    <div class="hint" data-i18n="goalHint"></div>
+    <label class="inline"><input type="checkbox" id="c-allday"> <span data-i18n="catAllDay"></span></label>
+    <label class="inline"><input type="checkbox" id="c-whole"> <span data-i18n="catWholeDay"></span></label>
+    <label class="inline"><input type="checkbox" id="c-once"> <span data-i18n="catOnce"></span></label>
+
+    <h3 data-i18n="slotsHeading"></h3>
+    <div class="hint" data-i18n="slotsHint"></div>
+    <div class="slot-rows" id="c-slots"></div>
+    <div><button type="button" class="btn" id="slot-add"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="addSlot"></span></button></div>
+
+    <h3 data-i18n="partsHeading"></h3>
+    <div class="field">
+      <label for="c-parts" data-i18n="partsLabel"></label>
+      <textarea id="c-parts" rows="4" data-i18n-ph="partsPh"></textarea>
+    </div>
+    <div class="hint" data-i18n="partsHint"></div>
+
+    <h3 data-i18n="cardHeading"></h3>
+    <div class="field"><label for="c-hint" data-i18n="hintPlanned"></label><input id="c-hint" type="text" maxlength="100"></div>
+    <div class="field"><label for="c-done" data-i18n="hintDone"></label><input id="c-done" type="text" maxlength="100"></div>
+
+    <div class="actions">
+      <div class="group"><button type="button" class="btn danger" id="cat-delete"></button></div>
+      <div class="group">
+        <button type="button" class="btn" id="cat-cancel" data-i18n="cancel"></button>
+        <button type="submit" class="btn primary" data-i18n="save"></button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+
+  const STORE_KEY = "weekplanner";
+  const COLORS = ["slate", "teal", "green", "violet", "yellow", "blue", "pink", "orange", "grey"];
+  const LENGTHS = [10, 20, 30, 45, 60, 90, 120];
+
+  const TEXT = {
+    nl: {
+      docTitle: "Weekplanner",
+      days: ["Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag", "Zondag"],
+      months: ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december"],
+      colors: { slate: "Leisteen", teal: "Petrol", green: "Groen", violet: "Paars", yellow: "Geel", blue: "Blauw", pink: "Roze", orange: "Oranje", grey: "Grijs" },
+      hour: "u",
+      lengthLabel: m => m < 60 ? m + " min" : (m === 60 ? "1 uur" : m === 90 ? "1,5 uur" : (m / 60) + " uur"),
+      range: "{a} tot {b}",
+      goalText(c) {
+        if (!c.goalMax) return "geen weekdoel";
+        const unit = (c.wholeDay || c.allDay) && c.goalMax === 1 ? "dag" : "keer";
+        const n = c.goalMin === c.goalMax ? c.goalMax : c.goalMin + " tot " + c.goalMax;
+        return n + " " + unit + " per week";
+      },
+      today: "Vandaag", prevWeek: "Vorige week", nextWeek: "Volgende week",
+      autoPlan: "Slim inplannen", autoPlanTitle: "Vult je weekdoelen in op je voorkeurstijden",
+      print: "Printen", newTask: "Nieuwe taak",
+      welcome: "Dit is een voorbeeldweek, zodat je ziet hoe het werkt. Pas de taken aan, of wis de voorbeelden en begin met je eigen planning.", welcomeClose: "Houden", clearExamples: "Voorbeelden wissen", example: "voorbeeld", examplesCleared: "Voorbeelden gewist",
+      progress: "Voortgang deze week", progressSub: "{d} van {t} taken afgevinkt (vaste taken niet meegeteld)",
+      doneOf: "{d} van {p} gedaan", noDay: "Nog geen dag", done: "Gedaan", pickDay: "Kies een dag.",
+      planMore: "Nog {n} keer inplannen", tooMuch: "Meer dan je doel, let op je rust.", onTrack: "Op schema.",
+      doneDefault: "Gedaan, goed bezig.", total: "Samen {t}.",
+      nextPart: "Volgend onderdeel {name}", partCount: "Aantal keer in de laatste 4 weken",
+      loading: "Planning laden...", nothing: "Nog niets gepland.",
+      allDay: "Hele dag", weekly: "elke week", todayTag: "vandaag",
+      clash: "Botst met {name}", overlap: "Overlapt", endsEarly: "Eindtijd vóór begintijd",
+      addOn: "Taak toevoegen op {day}", doneAria: "Gedaan: {t}", dragAria: "Versleep {t} naar een andere dag", dragTitle: "Versleep naar een andere dag",
+      noteAdd: "Dagnotitie toevoegen", noteEdit: "Klik om aan te passen", notePh: "Bijv. vrij, Engels in de ochtend", noteAria: "Dagnotitie voor {day}",
+      categories: "Soorten", categoriesHint: "Klik op een soort om naam, kleur, weekdoel en voorkeurstijden te wijzigen.", newCat: "Nieuwe soort",
+      edit: "Bewerken", listTitle: "Titel van deze lijst", boldHint: "Tip: zet woorden tussen twee sterretjes voor vet, bijvoorbeeld **belangrijk**.",
+      addRule: "Regel toevoegen", cancel: "Annuleren", save: "Opslaan", noRules: "Nog geen regels. Klik op Bewerken om er een toe te voegen.",
+      ruleHeadPh: "Kopje (vet)", ruleTextPh: "Tekst", up: "Omhoog", down: "Omlaag", remove: "Verwijderen",
+      addTask: "Taak toevoegen", editTask: "Taak bewerken", category: "Soort", title: "Titel", titlePh: "Bijv. tutorial over Git",
+      partOf: "Onderdeel {name}", switch: "Wissel", day: "Dag", from: "Van", to: "Tot", howLong: "Hoe lang?",
+      repeat: "Elke week op deze dag herhalen", note: "Notitie (optioneel)",
+      deleteAll: "Alle weken verwijderen?", sure: "Zeker? Verwijder", skipWeek: "Alleen deze week overslaan",
+      taskSaved: "Taak opgeslagen", taskAdded: "Taak toegevoegd", taskDeleted: "Taak verwijderd", skipped: "Overgeslagen voor deze week",
+      moved: "Verplaatst naar {day}", movedOnce: "Alleen deze week verplaatst naar {day}",
+      planned: "Ingepland: {list}", plannedOne: "{name} op {day}", plannedMany: "{n}x {name}",
+      nothingToPlan: "Alles is al gepland, of er zijn geen vrije voorkeurstijden meer.",
+      editCat: "Soort bewerken", newCatTitle: "Nieuwe soort", catName: "Naam (op de taak)", catNamePh: "Bijv. lezen",
+      catTitle: "Standaard titel", catTitlePh: "Bijv. boek lezen", color: "Kleur",
+      goalHeading: "Weekdoel", goalMin: "Minimaal per week", goalMax: "Maximaal per week", catLength: "Standaard duur (min)",
+      goalHint: "Zet minimaal en maximaal op 0 als deze soort geen weekdoel heeft, zoals werk.",
+      catAllDay: "Is altijd een hele dag", catWholeDay: "Heeft de hele dag nodig (geen andere taken op die dag)", catOnce: "Maximaal één keer per dag",
+      slotsHeading: "Voorkeurstijden voor Slim inplannen", slotsHint: "De bovenste krijgt voorrang. Gebruik de pijltjes om de volgorde te wijzigen.", addSlot: "Moment toevoegen",
+      partsHeading: "Onderdelen (optioneel)", partsLabel: "Eén per regel, met een tip na de dubbele punt", partsPh: "Lezen: lees een artikel en noteer 5 nieuwe woorden",
+      partsHint: "Met onderdelen stelt de planner steeds het onderdeel voor dat je het minst deed.",
+      cardHeading: "Teksten op de doelkaart", hintPlanned: "Als het gepland is", hintDone: "Als het gedaan is",
+      catDeleteSure: "Zeker? {n} taken worden grijs", catSaved: "Soort opgeslagen", catAdded: "Soort toegevoegd", catDeleted: "Soort verwijderd",
+      rulesSaved: "Regels opgeslagen", other: "Overig", mix: "Mix", mixTip: "Van alles een beetje, ongeveer 20 min per onderdeel.",
+      yourData: "Je gegevens", dataHint: "Alles wordt alleen in deze browser bewaard. Maak af en toe een back-up, bijvoorbeeld voordat je je browsergeschiedenis wist.",
+      exportData: "Back-up downloaden", importData: "Back-up terugzetten", reset: "Alles wissen", resetSure: "Zeker? Alles wissen",
+      imported: "Back-up teruggezet", importFail: "Dit bestand kon niet worden gelezen.", resetDone: "Alles gewist",
+      saveFail: "Opslaan lukte niet. Je browser blokkeert mogelijk opslag voor deze pagina.",
+      footer: "Je gegevens blijven op dit apparaat. Er is geen account nodig.",
+      defaults: {
+        cats: [
+          { id: "work", name: "Werk", title: "Werken", color: "slate", goalMin: 0, goalMax: 0, length: 540, slots: [{ day: 1, start: "09:00" }, { day: 2, start: "09:00" }, { day: 3, start: "09:00" }], once: true },
+          { id: "lang", name: "Engels", title: "Engels leren", color: "teal", goalMin: 2, goalMax: 3, length: 60, once: true,
+            slots: [{ day: 0, start: "09:30" }, { day: 4, start: "09:30" }, { day: 2, start: "21:00" }, { day: 1, start: "21:00" }, { day: 3, start: "21:00" }, { day: 0, start: "21:00" }],
+            parts: [{ name: "Lezen", tip: "Lees een artikel of hoofdstuk, noteer 5 nieuwe woorden." }, { name: "Luisteren", tip: "Podcast of video zonder ondertitels, vat het kort samen." },
+              { name: "Schrijven", tip: "Schrijf ongeveer 150 woorden over je dag of je werk." }, { name: "Spreken", tip: "Praat 10 tot 15 minuten hardop of neem jezelf op." }],
+            hint: "Geen zin in dit onderdeel? Wissel gerust.", doneHint: "Top, je Engels groeit." },
+          { id: "sport", name: "Sport", title: "Sporten", color: "green", goalMin: 2, goalMax: 2, length: 30, once: true,
+            slots: [{ day: 0, start: "17:00" }, { day: 3, start: "19:00" }, { day: 4, start: "17:00" }, { day: 1, start: "19:00" }, { day: 2, start: "19:00" }, { day: 6, start: "11:00" }],
+            hint: "Kort is ook goed: 10 minuten telt mee.", doneHint: "Lekker bezig, goed voor je hoofd." },
+          { id: "project", name: "Tutorial", title: "Tutorial maken", color: "violet", goalMin: 1, goalMax: 1, length: 420, wholeDay: true, once: true,
+            slots: [{ day: 6, start: "10:00" }, { day: 5, start: "10:00" }, { day: 4, start: "10:00" }],
+            hint: "Kies vooraf je onderwerp, dan start je meteen.", doneHint: "Mooi werk, weer een tutorial af." },
+          { id: "rest", name: "Pauzedag", title: "Pauzedag", color: "yellow", goalMin: 1, goalMax: 1, length: 0, allDay: true, wholeDay: true, once: true,
+            slots: [{ day: 5, start: "00:00" }, { day: 6, start: "00:00" }],
+            hint: "Alles mag: uitgaan, chillen of lekker niks doen.", doneHint: "Goed zo. Rust hoort er ook bij." },
+          { id: "other", name: "Overig", title: "", color: "grey", length: 60 }
+        ],
+        rules: { heading: "Jouw regels", items: [
+          { title: "Werk", text: "Dinsdag t/m donderdag, 09:00 tot 18:00. Andere taken in die tijd krijgen een waarschuwing." },
+          { title: "Engels", text: "2 tot 3 keer per week, 1 tot 2 uur. Maandag of vrijdag in de ochtend of middag, of in de avond voor het slapen. Maximaal **één keer per dag**." },
+          { title: "Onderdelen wisselen", text: "Het onderdeel dat je de laatste weken het minst deed, wordt als volgende voorgesteld." },
+          { title: "Sporten", text: "2 keer per week. Kort voor het slapen (bijvoorbeeld 15 minuten) of langer na het werk. Jij kiest de duur." },
+          { title: "Pauzedag", text: "Eén dag per week waarop alles mag: uitgaan, chillen of lekker niks doen. Voorkeur: **zaterdag**." },
+          { title: "Tutorial", text: "Eén hele dag, alleen op vrijdag of in het weekend. Voorkeur: **zondag**." }
+        ] },
+        notes: ["Vrij, Engels in de ochtend of middag", "Werk tot 18:00, Engels in de avond", "Werk tot 18:00, Engels in de avond", "Werk tot 18:00, Engels in de avond", "Vrij, Engels of tutorialdag", "Weekend, pauzedag", "Weekend, tutorialdag"]
+      }
+    },
+
+    en: {
+      docTitle: "Week Planner",
+      days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+      months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+      colors: { slate: "Slate", teal: "Teal", green: "Green", violet: "Purple", yellow: "Yellow", blue: "Blue", pink: "Pink", orange: "Orange", grey: "Grey" },
+      hour: "h",
+      lengthLabel: m => m < 60 ? m + " min" : (m === 60 ? "1 hour" : (m / 60) + " hours"),
+      range: "{a} to {b}",
+      goalText(c) {
+        if (!c.goalMax) return "no weekly goal";
+        if ((c.wholeDay || c.allDay) && c.goalMax === 1) return "1 day a week";
+        if (c.goalMin !== c.goalMax) return c.goalMin + " to " + c.goalMax + " times a week";
+        return c.goalMax === 1 ? "once a week" : c.goalMax === 2 ? "twice a week" : c.goalMax + " times a week";
+      },
+      today: "Today", prevWeek: "Previous week", nextWeek: "Next week",
+      autoPlan: "Auto plan", autoPlanTitle: "Fills in your weekly goals at your preferred times",
+      print: "Print", newTask: "New task",
+      welcome: "This is an example week, so you can see how it works. Change the tasks, or clear the examples and start with your own plan.", welcomeClose: "Keep", clearExamples: "Clear examples", example: "example", examplesCleared: "Examples cleared",
+      progress: "This week's progress", progressSub: "{d} of {t} tasks done (recurring tasks not counted)",
+      doneOf: "{d} of {p} done", noDay: "No day yet", done: "Done", pickDay: "Pick a day.",
+      planMore: "Plan {n} more", tooMuch: "More than your goal, mind your rest.", onTrack: "On track.",
+      doneDefault: "Done, nice work.", total: "{t} in total.",
+      nextPart: "Next {name} part", partCount: "Times in the last 4 weeks",
+      loading: "Loading...", nothing: "Nothing planned yet.",
+      allDay: "All day", weekly: "every week", todayTag: "today",
+      clash: "Clashes with {name}", overlap: "Overlaps", endsEarly: "Ends before it starts",
+      addOn: "Add a task on {day}", doneAria: "Done: {t}", dragAria: "Drag {t} to another day", dragTitle: "Drag to another day",
+      noteAdd: "Add a day note", noteEdit: "Click to edit", notePh: "E.g. day off, gym in the evening", noteAria: "Day note for {day}",
+      categories: "Categories", categoriesHint: "Click a category to change its name, color, weekly goal and preferred times.", newCat: "New category",
+      edit: "Edit", listTitle: "List title", boldHint: "Tip: put words between two asterisks to make them bold, for example **important**.",
+      addRule: "Add rule", cancel: "Cancel", save: "Save", noRules: "No rules yet. Click Edit to add one.",
+      ruleHeadPh: "Heading (bold)", ruleTextPh: "Text", up: "Move up", down: "Move down", remove: "Delete",
+      addTask: "Add task", editTask: "Edit task", category: "Category", title: "Title", titlePh: "E.g. Git tutorial",
+      partOf: "{name} part", switch: "Switch", day: "Day", from: "From", to: "To", howLong: "How long?",
+      repeat: "Repeat every week on this day", note: "Note (optional)",
+      deleteAll: "Delete for all weeks?", sure: "Sure? Delete", skipWeek: "Skip this week only",
+      taskSaved: "Task saved", taskAdded: "Task added", taskDeleted: "Task deleted", skipped: "Skipped for this week",
+      moved: "Moved to {day}", movedOnce: "Moved to {day} for this week only",
+      planned: "Planned: {list}", plannedOne: "{name} on {day}", plannedMany: "{n}x {name}",
+      nothingToPlan: "Everything is planned already, or there are no free preferred times left.",
+      editCat: "Edit category", newCatTitle: "New category", catName: "Name (shown on tasks)", catNamePh: "E.g. Reading",
+      catTitle: "Default title", catTitlePh: "E.g. Read a book", color: "Color",
+      goalHeading: "Weekly goal", goalMin: "Minimum per week", goalMax: "Maximum per week", catLength: "Default length (min)",
+      goalHint: "Set both to 0 if this category has no weekly goal, like work.",
+      catAllDay: "Is always an all-day task", catWholeDay: "Needs the whole day (no other tasks that day)", catOnce: "At most once a day",
+      slotsHeading: "Preferred times for Auto plan", slotsHint: "The top one goes first. Use the arrows to change the order.", addSlot: "Add a time",
+      partsHeading: "Parts (optional)", partsLabel: "One per line, with a tip after the colon", partsPh: "Reading: read an article and write down 5 new words",
+      partsHint: "With parts, the planner always suggests the one you did least.",
+      cardHeading: "Goal card texts", hintPlanned: "When planned", hintDone: "When done",
+      catDeleteSure: "Sure? {n} tasks turn grey", catSaved: "Category saved", catAdded: "Category added", catDeleted: "Category deleted",
+      rulesSaved: "Rules saved", other: "Other", mix: "Mix", mixTip: "A bit of everything, about 20 minutes per part.",
+      yourData: "Your data", dataHint: "Everything is stored in this browser only. Make a backup now and then, for example before clearing your browsing data.",
+      exportData: "Download backup", importData: "Restore backup", reset: "Erase everything", resetSure: "Sure? Erase everything",
+      imported: "Backup restored", importFail: "This file could not be read.", resetDone: "Everything erased",
+      saveFail: "Could not save. Your browser may be blocking storage for this page.",
+      footer: "Your data stays on this device. No account needed.",
+      defaults: {
+        cats: [
+          { id: "work", name: "Work", title: "Work", color: "slate", goalMin: 0, goalMax: 0, length: 480, once: true,
+            slots: [{ day: 0, start: "09:00" }, { day: 1, start: "09:00" }, { day: 2, start: "09:00" }, { day: 3, start: "09:00" }, { day: 4, start: "09:00" }] },
+          { id: "lang", name: "Language", title: "Language practice", color: "teal", goalMin: 2, goalMax: 3, length: 60, once: true,
+            slots: [{ day: 0, start: "20:00" }, { day: 2, start: "20:00" }, { day: 4, start: "20:00" }, { day: 1, start: "20:00" }, { day: 3, start: "20:00" }, { day: 5, start: "10:00" }],
+            parts: [{ name: "Reading", tip: "Read an article or a chapter, write down 5 new words." }, { name: "Listening", tip: "Podcast or video without subtitles, then sum it up." },
+              { name: "Writing", tip: "Write about 150 words about your day." }, { name: "Speaking", tip: "Talk out loud for 10 to 15 minutes or record yourself." }],
+            hint: "Not in the mood for this part? Switch it.", doneHint: "Great, you are getting better." },
+          { id: "sport", name: "Exercise", title: "Workout", color: "green", goalMin: 2, goalMax: 2, length: 30, once: true,
+            slots: [{ day: 1, start: "18:00" }, { day: 3, start: "18:00" }, { day: 5, start: "09:00" }, { day: 0, start: "18:00" }, { day: 2, start: "18:00" }],
+            hint: "Short is fine too: 10 minutes counts.", doneHint: "Nice, good for body and mind." },
+          { id: "project", name: "Project", title: "Work on my project", color: "violet", goalMin: 1, goalMax: 1, length: 420, wholeDay: true, once: true,
+            slots: [{ day: 6, start: "10:00" }, { day: 5, start: "10:00" }],
+            hint: "Pick what you will work on beforehand.", doneHint: "Good job, real progress." },
+          { id: "rest", name: "Rest day", title: "Rest day", color: "yellow", goalMin: 1, goalMax: 1, length: 0, allDay: true, wholeDay: true, once: true,
+            slots: [{ day: 5, start: "00:00" }, { day: 6, start: "00:00" }],
+            hint: "Anything goes: go out, relax or do nothing at all.", doneHint: "Well done. Rest matters too." },
+          { id: "other", name: "Other", title: "", color: "grey", length: 60 }
+        ],
+        rules: { heading: "Your rules", items: [
+          { title: "Work", text: "Monday to Friday, 09:00 to 17:00. Tasks that overlap with work get a warning." },
+          { title: "Language", text: "2 to 3 times a week, about an hour, in the evening. At most **once a day**." },
+          { title: "Switch parts", text: "The part you did least in the last weeks is suggested next." },
+          { title: "Exercise", text: "Twice a week. Short is fine, 10 minutes counts." },
+          { title: "Rest day", text: "One day a week where anything goes. Preferably **Saturday**." },
+          { title: "Project", text: "One full day for your own project. Preferably **Sunday**." }
+        ] },
+        notes: ["Work day", "Work day", "Work day", "Work day", "Work day", "Weekend, rest day", "Weekend, project day"]
+      }
+    }
+  };
+
+  // State and storage
+
+  const $ = id => document.getElementById(id);
+  let firstVisit = false;
+  let state = load();
+  let weekStart = mondayOf(new Date());
+  let editingTask = null, editingDate = null, editingCat = null;
+  let pauseWeekRender = false, rulesOpen = false, saveWarned = false;
+
+  function blankState(lang) { return { lang, items: [], cats: null, rules: null, notes: null, welcomeSeen: false }; }
+
+  function load() {
+    const urlLang = new URLSearchParams(location.search).get("lang");
+    let data = null;
+    try { data = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); } catch (e) { data = null; }
+    const s = blankState("nl");
+    if (data && Array.isArray(data.items)) {
+      s.lang = data.lang === "en" ? "en" : "nl";
+      s.items = data.items;
+      s.cats = Array.isArray(data.cats) ? data.cats : null;
+      s.rules = data.rules && Array.isArray(data.rules.items) ? data.rules : null;
+      s.notes = Array.isArray(data.notes) ? data.notes : null;
+      s.welcomeSeen = !!data.welcomeSeen;
+    }
+    else firstVisit = true;
+    if (urlLang === "en" || urlLang === "nl") s.lang = urlLang;
+    return s;
+  }
+
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+    catch (e) { if (!saveWarned) { saveWarned = true; toast(t("saveFail")); } }
+  }
+
+  function commit() { save(); render(); }
+
+  // Text helpers
+
+  function L() { return TEXT[state.lang]; }
+  function t(key, vars) {
+    let s = L()[key];
+    if (s === undefined) return key;
+    if (vars) Object.keys(vars).forEach(k => { s = s.split("{" + k + "}").join(vars[k]); });
+    return s;
+  }
+  function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+  function rich(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br>"); }
+  function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+  function applyStaticText() {
+    document.documentElement.lang = state.lang;
+    document.title = t("docTitle");
+    document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-aria]").forEach(el => { el.setAttribute("aria-label", t(el.dataset.i18nAria)); });
+    document.querySelectorAll("[data-i18n-title]").forEach(el => { el.title = t(el.dataset.i18nTitle); });
+    document.querySelectorAll("[data-i18n-ph]").forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+    document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === state.lang)));
+    $("lengths").innerHTML = LENGTHS.map(m => `<button type="button" class="chip" data-min="${m}">${L().lengthLabel(m)}</button>`).join("");
+  }
+
+  // Dates and times
+
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function iso(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function parseDate(s) { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); }
+  function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+  function mondayOf(d) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); return addDays(x, -((x.getDay() + 6) % 7)); }
+  function weekday(d) { return (d.getDay() + 6) % 7; }
+  function weekNumber(d) {
+    const x = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    const n = x.getUTCDay() || 7;
+    x.setUTCDate(x.getUTCDate() + 4 - n);
+    const y = new Date(Date.UTC(x.getUTCFullYear(), 0, 1));
+    return Math.ceil(((x - y) / 864e5 + 1) / 7);
+  }
+  function minutes(t) { if (!t) return 0; const [h, m] = t.split(":").map(Number); return h * 60 + m; }
+  function clock(m) { m = Math.max(0, Math.min(23 * 60 + 59, m)); return pad(Math.floor(m / 60)) + ":" + pad(m % 60); }
+  function length(m) {
+    if (m <= 0) return "";
+    if (m < 60) return m + " min";
+    const h = Math.floor(m / 60), r = m % 60;
+    return h + L().hour + (r ? " " + r : "");
+  }
+  function dayName(i) { return L().days[i]; }
+  function dayInText(i) { return state.lang === "nl" ? dayName(i).toLowerCase() : dayName(i); }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+  // Categories
+
+  function normCat(c) {
+    const n = Object.assign({ id: "", name: t("other"), title: "", color: "grey", goalMin: 0, goalMax: 0, length: 60,
+      allDay: false, wholeDay: false, once: false, slots: [], parts: [], hint: "", doneHint: "" }, c || {});
+    n.goalMin = Math.max(0, +n.goalMin || 0);
+    n.goalMax = Math.max(n.goalMin, +n.goalMax || 0);
+    n.length = Math.max(0, +n.length || 0);
+    n.slots = Array.isArray(n.slots) ? n.slots.filter(s => s && s.day >= 0 && s.day <= 6) : [];
+    n.parts = Array.isArray(n.parts) ? n.parts.filter(p => p && p.name) : [];
+    if (!COLORS.includes(n.color)) n.color = "grey";
+    return n;
+  }
+  function cats() { return (state.cats || L().defaults.cats).map(normCat); }
+  function catById(id) { return cats().find(c => c.id === id) || normCat({ id: id || "" }); }
+  function goalText(c) { return L().goalText(c); }
+
+  function partCounts(c) {
+    const from = iso(addDays(weekStart, -21)), to = iso(addDays(weekStart, 6)), count = {};
+    c.parts.forEach(p => { count[p.name] = 0; });
+    state.items.forEach(it => {
+      if (it.cat !== c.id || !it.date || it.date < from || it.date > to) return;
+      if (it.part === "Mix") c.parts.forEach(p => { count[p.name] += 0.5; });
+      else if (count[it.part] !== undefined) count[it.part]++;
+    });
+    return count;
+  }
+  function nextPart(c, extra) {
+    if (!c.parts.length) return null;
+    const count = partCounts(c);
+    (extra || []).forEach(k => { if (count[k] !== undefined) count[k]++; });
+    return c.parts.reduce((best, p) => count[p.name] < count[best.name] ? p : best, c.parts[0]).name;
+  }
+  function partTip(c, name) {
+    if (name === "Mix") return t("mixTip");
+    const p = c.parts.find(x => x.name === name);
+    return p ? p.tip : "";
+  }
+
+  // Tasks
+
+  function occursOn(it, date) {
+    const s = iso(date);
+    if (it.repeat === "weekly") {
+      if (it.weekday !== weekday(date)) return false;
+      if (it.startDate && s < it.startDate) return false;
+      return !(it.skipDates || []).includes(s);
+    }
+    return it.date === s;
+  }
+  function isDone(it, s) { return it.repeat === "weekly" ? (it.doneDates || []).includes(s) : !!it.done; }
+  function tasksOn(date) {
+    return state.items.filter(it => occursOn(it, date))
+      .sort((a, b) => (b.allDay ? 1 : 0) - (a.allDay ? 1 : 0) || minutes(a.start) - minutes(b.start));
+  }
+  function warningsFor(it, list) {
+    const out = [];
+    const whole = list.find(o => o !== it && catById(o.cat).wholeDay);
+    if (whole && !catById(it.cat).wholeDay) out.push(t("clash", { name: catById(whole.cat).name }));
+    if (it.allDay) return out;
+    const a = minutes(it.start), b = minutes(it.end);
+    if (list.some(o => o !== it && !o.allDay && minutes(o.start) < b && minutes(o.end) > a)) out.push(t("overlap"));
+    if (b <= a) out.push(t("endsEarly"));
+    return out;
+  }
+  function addTask(data) { state.items.push(Object.assign({}, data, { id: uid() })); }
+  function updateTask(id, data) { const i = state.items.findIndex(x => x.id === id); if (i > -1) state.items[i] = Object.assign({}, data, { id }); }
+  function removeTask(id) { state.items = state.items.filter(x => x.id !== id); }
+  function copy(it) { const c = JSON.parse(JSON.stringify(it)); delete c.id; return c; }
+
+  // Rendering
+
+  const ICON_PLUS = '<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+  const ICON_PEN = '<svg class="i" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>';
+  const ICON_UP = '<svg class="i" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>';
+  const ICON_DOWN = '<svg class="i" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+  const ICON_TRASH = '<svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>';
+  const ICON_GRIP = '<svg viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.7"/><circle cx="15" cy="6" r="1.7"/><circle cx="9" cy="12" r="1.7"/><circle cx="15" cy="12" r="1.7"/><circle cx="9" cy="18" r="1.7"/><circle cx="15" cy="18" r="1.7"/></svg>';
+
+  function weekStats() {
+    const stats = {};
+    cats().forEach(c => { stats[c.id] = { planned: 0, done: 0, day: null, mins: 0 }; });
+    let total = 0, finished = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(weekStart, i), key = iso(d);
+      tasksOn(d).forEach(it => {
+        const done = isDone(it, key);
+        if (it.repeat !== "weekly") { total++; if (done) finished++; }
+        const s = stats[it.cat];
+        if (!s) return;
+        s.planned++;
+        if (done) s.done++;
+        if (s.day === null) s.day = i;
+        if (!it.allDay) s.mins += Math.max(0, minutes(it.end) - minutes(it.start));
+      });
+    }
+    return { stats, total, finished };
+  }
+
+  function dots(n, planned, done) {
+    let h = '<div class="dots">';
+    for (let i = 0; i < Math.max(n, planned); i++) h += `<span class="dot ${i < done ? "done" : i < planned ? "plan" : ""}"></span>`;
+    return h + "</div>";
+  }
+
+  function renderGoals() {
+    const { stats, total, finished } = weekStats();
+    const pct = total ? Math.round(finished / total * 100) : 0;
+    let h = `<div class="goal"><div class="lbl">${t("progress")}</div><div class="val">${pct}%</div>
+      <div class="progress"><span style="width:${pct}%"></span></div><div class="sub">${t("progressSub", { d: finished, t: total })}</div></div>`;
+    cats().filter(c => c.goalMax > 0).forEach(c => {
+      const s = stats[c.id], single = c.goalMax === 1;
+      const val = single ? (s.done ? t("done") : s.planned ? dayName(s.day) : t("noDay")) : t("doneOf", { d: s.done, p: s.planned });
+      let sub;
+      if (s.planned && s.done >= s.planned && s.done >= c.goalMin) sub = c.doneHint || t("doneDefault");
+      else if (s.planned < c.goalMin) sub = single ? t("pickDay") : t("planMore", { n: c.goalMin - s.planned });
+      else if (s.planned > c.goalMax) sub = t("tooMuch");
+      else sub = c.hint || t("onTrack");
+      if (!single && s.mins && !c.allDay) sub += " " + t("total", { t: length(s.mins) });
+      h += `<div class="goal col-${c.color}"><div class="lbl"><span class="cdot"></span>${esc(c.name)}, ${esc(goalText(c))}</div>
+        <div class="val">${esc(val)}</div>${dots(c.goalMax, s.planned, s.done)}<div class="sub">${esc(sub)}</div></div>`;
+    });
+    cats().filter(c => c.parts.length).forEach(c => {
+      const count = partCounts(c), next = nextPart(c);
+      h += `<div class="goal col-${c.color}"><div class="lbl"><span class="cdot"></span>${esc(t("nextPart", { name: c.name }))}</div>
+        <div class="val">${esc(next)}</div>
+        <div class="parts">${c.parts.map(p => `<span class="part ${p.name === next ? "next" : ""}">${esc(p.name)} ${Math.round(count[p.name] * 10) / 10}</span>`).join("")}</div>
+        <div class="sub">${t("partCount")}</div></div>`;
+    });
+    $("goals").innerHTML = h;
+  }
+
+  function noteFor(i) { const n = state.notes || L().defaults.notes; return typeof n[i] === "string" ? n[i] : ""; }
+
+  function renderWeek() {
+    const todayKey = iso(new Date()), end = addDays(weekStart, 6), m = L().months;
+    $("week-number").textContent = "Week " + weekNumber(weekStart);
+    const a = weekStart.getMonth() === end.getMonth() ? String(weekStart.getDate()) : weekStart.getDate() + " " + m[weekStart.getMonth()];
+    $("week-range").textContent = t("range", { a, b: end.getDate() + " " + m[end.getMonth()] + " " + end.getFullYear() });
+
+    let h = "";
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(weekStart, i), key = iso(d), list = tasksOn(d);
+      const cls = key === todayKey ? "today" : key < todayKey ? "past" : "";
+      const body = !list.length ? `<div class="empty">${t("nothing")}</div>` : list.map(it => {
+        const c = catById(it.cat), done = isDone(it, key), warns = warningsFor(it, list);
+        const time = it.allDay ? t("allDay") : `${esc(it.start)} - ${esc(it.end)}`;
+        const badges = [...(it.allDay ? [] : [length(minutes(it.end) - minutes(it.start))]), ...(it.repeat === "weekly" ? [t("weekly")] : []), ...(it.example ? [t("example")] : [])].filter(Boolean);
+        const tip = it.part ? partTip(c, it.part) : "";
+        const part = it.part ? `<div class="tip">${esc(it.part === "Mix" ? t("mix") : it.part)}${tip ? ": " + esc(tip) : ""}</div>` : "";
+        const note = it.note ? `<div class="tip">${esc(it.note)}</div>` : "";
+        return `<div class="task">
+          <input type="checkbox" class="check" aria-label="${esc(t("doneAria", { t: it.title }))}" data-done="${esc(it.id)}" data-date="${key}" ${done ? "checked" : ""}>
+          <button type="button" class="card col-${c.color}" data-edit="${esc(it.id)}" data-date="${key}">
+            <div class="card-top"><span class="cat">${esc(c.name)}</span><span class="time">${time}</span></div>
+            <div class="title ${done ? "is-done" : ""}">${esc(it.title)}</div>${part}${note}
+            <div class="badges">${badges.map(x => `<span class="badge">${esc(x)}</span>`).join("")}${warns.map(x => `<span class="warn">${esc(x)}</span>`).join("")}</div>
+          </button>
+          <button type="button" class="grip" data-grip="${esc(it.id)}" data-date="${key}" aria-label="${esc(t("dragAria", { t: it.title }))}" title="${esc(t("dragTitle"))}">${ICON_GRIP}</button>
+        </div>`;
+      }).join("");
+      const note = noteFor(i);
+      h += `<article class="day ${cls}" data-day="${key}">
+        <div class="dhead">
+          <div><div class="dnum">${d.getDate()}</div><div class="dname">${dayName(i)}${key === todayKey ? `<span class="tag-today">${t("todayTag")}</span>` : ""}</div></div>
+          <button type="button" class="add" data-add="${key}" aria-label="${esc(t("addOn", { day: dayName(i) }))}">${ICON_PLUS}</button>
+        </div>
+        <div class="list">${body}</div>
+        ${note ? `<button type="button" class="note-btn" data-note="${i}" title="${esc(t("noteEdit"))}"><span>${esc(note)}</span>${ICON_PEN}</button>`
+               : `<button type="button" class="note-btn empty-note" data-note="${i}"><span>${t("noteAdd")}</span></button>`}
+      </article>`;
+    }
+    $("week").innerHTML = h;
+  }
+
+  function renderCats() {
+    const list = cats();
+    $("cat-list").innerHTML = list.map(c => {
+      const meta = [cap(goalText(c)), c.allDay ? t("allDay").toLowerCase() : length(c.length)].filter(Boolean).join(", ");
+      return `<button type="button" class="cat-card col-${c.color}" data-cat="${esc(c.id)}"><span class="cdot"></span>
+        <span style="min-width:0"><b>${esc(c.name)}</b><span class="meta">${esc(meta)}</span></span>${ICON_PEN}</button>`;
+    }).join("");
+    const sel = $("f-cat"), current = sel.value;
+    sel.innerHTML = list.map(c => `<option value="${esc(c.id)}">${esc(c.name)}${c.title && c.title !== c.name ? " (" + esc(c.title) + ")" : ""}</option>`).join("");
+    if (current && list.some(c => c.id === current)) sel.value = current;
+  }
+
+  function renderRules() {
+    const r = state.rules || L().defaults.rules;
+    $("rules-title").textContent = r.heading || L().defaults.rules.heading;
+    $("rules-view").innerHTML = r.items.length
+      ? `<ul class="rule-list">${r.items.map(x => `<li>${x.title ? `<strong>${esc(x.title)}</strong>` : ""}${rich(x.text || "")}</li>`).join("")}</ul>`
+      : `<div class="empty">${t("noRules")}</div>`;
+  }
+
+  function render() {
+    renderGoals();
+    renderCats();
+    if (!pauseWeekRender) renderWeek();
+    if (!rulesOpen) renderRules();
+    $("welcome").hidden = state.welcomeSeen || !state.items.some(it => it.example);
+  }
+
+  // Toast
+
+  function toast(msg) {
+    const el = $("toast");
+    el.textContent = msg;
+    el.hidden = false;
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => { el.hidden = true; }, 3400);
+  }
+
+  // Task dialog
+
+  const taskDialog = $("task-dialog");
+
+  function slotStart(c, dateStr) {
+    const wd = weekday(parseDate(dateStr));
+    const s = c.slots.find(x => x.day === wd) || c.slots[0];
+    return s ? s.start : null;
+  }
+  function applyCatDefaults(c) {
+    $("f-allday").checked = !!c.allDay;
+    if (c.allDay) return;
+    const start = slotStart(c, $("f-date").value || iso(weekStart));
+    if (start) $("f-start").value = start;
+    $("f-end").value = clock(minutes($("f-start").value || "09:00") + (c.length || 60));
+  }
+  function fillParts(c, value) {
+    const opts = c.parts.length ? [...c.parts.map(p => p.name), "Mix"] : [];
+    $("f-part").innerHTML = opts.map(o => `<option value="${esc(o)}">${esc(o === "Mix" ? t("mix") : o)}</option>`).join("");
+    $("part-label").textContent = t("partOf", { name: c.name });
+    if (value && opts.includes(value)) $("f-part").value = value;
+    else if (opts.length) $("f-part").value = nextPart(c);
+  }
+  function syncTaskForm() {
+    const c = catById($("f-cat").value);
+    $("part-field").hidden = !c.parts.length;
+    const allDay = $("f-allday").checked;
+    $("f-start").disabled = allDay;
+    $("f-end").disabled = allDay;
+    $("length-field").hidden = allDay;
+    const m = minutes($("f-end").value) - minutes($("f-start").value);
+    document.querySelectorAll("#lengths .chip").forEach(x => x.classList.toggle("on", +x.dataset.min === m));
+  }
+  function openTask(it, date) {
+    editingTask = it || null;
+    editingDate = date;
+    $("task-dialog-title").textContent = t(it ? "editTask" : "addTask");
+    const list = cats();
+    const c = it ? catById(it.cat) : (list.find(x => x.goalMax > 0) || list[0]);
+    $("f-cat").value = c.id;
+    $("f-title").value = it ? it.title : (c.title || c.name);
+    $("f-date").value = date || iso(weekStart);
+    if (it) { $("f-start").value = it.start || "09:00"; $("f-end").value = it.end || "10:00"; $("f-allday").checked = !!it.allDay; }
+    else applyCatDefaults(c);
+    fillParts(c, it && it.part);
+    $("f-repeat").checked = it ? it.repeat === "weekly" : false;
+    $("f-note").value = it ? it.note || "" : "";
+    const del = $("task-delete");
+    del.hidden = !it;
+    del.classList.remove("armed");
+    del.textContent = t("remove");
+    $("task-skip").hidden = !(it && it.repeat === "weekly");
+    syncTaskForm();
+    taskDialog.showModal();
+  }
+
+  $("f-cat").addEventListener("change", () => {
+    const c = catById($("f-cat").value), title = $("f-title");
+    const auto = !title.value || cats().some(x => title.value === x.title || title.value === x.name || title.value.startsWith(x.name + ":"));
+    if (auto) title.value = c.title || c.name;
+    applyCatDefaults(c);
+    fillParts(c);
+    syncTaskForm();
+  });
+  $("f-allday").addEventListener("change", syncTaskForm);
+  $("f-start").addEventListener("change", syncTaskForm);
+  $("f-end").addEventListener("change", syncTaskForm);
+  $("lengths").addEventListener("click", e => {
+    const chip = e.target.closest("[data-min]");
+    if (!chip) return;
+    $("f-end").value = clock(minutes($("f-start").value || "09:00") + Number(chip.dataset.min));
+    syncTaskForm();
+  });
+  $("part-switch").addEventListener("click", () => { const s = $("f-part"); if (s.options.length) s.selectedIndex = (s.selectedIndex + 1) % s.options.length; });
+  $("task-cancel").addEventListener("click", () => taskDialog.close());
+
+  $("task-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const date = $("f-date").value;
+    if (!date) return;
+    const c = catById($("f-cat").value), repeat = $("f-repeat").checked;
+    const base = editingTask ? copy(editingTask) : { doneDates: [], skipDates: [], done: false, createdAt: new Date().toISOString() };
+    const keepStart = editingTask && editingTask.repeat === "weekly" && editingTask.startDate && editingTask.startDate < date;
+    const data = Object.assign(base, {
+      title: $("f-title").value.trim() || c.title || c.name,
+      cat: c.id,
+      part: c.parts.length ? $("f-part").value : null,
+      allDay: $("f-allday").checked,
+      start: $("f-start").value || "09:00",
+      end: $("f-end").value || "10:00",
+      note: $("f-note").value.trim(),
+      repeat: repeat ? "weekly" : "none",
+      date: repeat ? null : date,
+      weekday: repeat ? weekday(parseDate(date)) : null,
+      startDate: repeat ? (keepStart ? editingTask.startDate : date) : null
+    });
+    delete data.example;
+    if (editingTask) updateTask(editingTask.id, data); else addTask(data);
+    taskDialog.close();
+    commit();
+    toast(t(editingTask ? "taskSaved" : "taskAdded"));
+  });
+
+  $("task-delete").addEventListener("click", () => {
+    const b = $("task-delete");
+    if (!b.classList.contains("armed")) {
+      b.classList.add("armed");
+      b.textContent = t(editingTask.repeat === "weekly" ? "deleteAll" : "sure");
+      return;
+    }
+    removeTask(editingTask.id);
+    taskDialog.close();
+    commit();
+    toast(t("taskDeleted"));
+  });
+
+  $("task-skip").addEventListener("click", () => {
+    const data = copy(editingTask);
+    data.skipDates = [...new Set([...(editingTask.skipDates || []), editingDate])];
+    updateTask(editingTask.id, data);
+    taskDialog.close();
+    commit();
+    toast(t("skipped"));
+  });
+
+  // Category dialog
+
+  const catDialog = $("cat-dialog");
+  let rowSeq = 0;
+
+  function slotRow(s) {
+    const n = rowSeq++;
+    return `<div class="slot-row">
+      <select id="slot-day-${n}" aria-label="${esc(t("day"))}">${L().days.map((d, i) => `<option value="${i}" ${i === s.day ? "selected" : ""}>${d}</option>`).join("")}</select>
+      <input id="slot-time-${n}" type="time" value="${esc(s.start || "09:00")}" aria-label="${esc(t("from"))}">
+      <div class="icon-btns">
+        <button type="button" class="icon-btn" data-up aria-label="${esc(t("up"))}">${ICON_UP}</button>
+        <button type="button" class="icon-btn" data-down aria-label="${esc(t("down"))}">${ICON_DOWN}</button>
+        <button type="button" class="icon-btn del" data-remove aria-label="${esc(t("remove"))}">${ICON_TRASH}</button>
+      </div></div>`;
+  }
+
+  function openCat(c) {
+    editingCat = c || null;
+    const used = cats().map(x => x.color);
+    const x = c || normCat({ id: "", name: "", color: COLORS.find(k => !used.includes(k)) || "blue", length: 60, once: true });
+    $("cat-dialog-title").textContent = t(c ? "editCat" : "newCatTitle");
+    $("c-name").value = x.name;
+    $("c-title").value = x.title;
+    $("c-colors").innerHTML = COLORS.map(k => `<label class="swatch col-${k}" title="${esc(L().colors[k])}">
+      <input type="radio" name="c-color" id="c-color-${k}" value="${k}" ${k === x.color ? "checked" : ""} aria-label="${esc(L().colors[k])}"><span></span></label>`).join("");
+    $("c-min").value = x.goalMin;
+    $("c-max").value = x.goalMax;
+    $("c-length").value = x.length || 60;
+    $("c-allday").checked = !!x.allDay;
+    $("c-whole").checked = !!x.wholeDay;
+    $("c-once").checked = !!x.once;
+    $("c-slots").innerHTML = x.slots.map(slotRow).join("");
+    $("c-parts").value = x.parts.map(p => p.name + (p.tip ? ": " + p.tip : "")).join("\n");
+    $("c-hint").value = x.hint || "";
+    $("c-done").value = x.doneHint || "";
+    const del = $("cat-delete");
+    del.hidden = !c;
+    del.classList.remove("armed");
+    del.textContent = t("remove");
+    del.dataset.used = c ? state.items.filter(it => it.cat === c.id).length : 0;
+    catDialog.showModal();
+    $("c-name").focus();
+  }
+
+  $("cat-list").addEventListener("click", e => { const b = e.target.closest("[data-cat]"); if (b) openCat(cats().find(c => c.id === b.dataset.cat)); });
+  $("new-cat").addEventListener("click", () => openCat(null));
+  $("cat-cancel").addEventListener("click", () => catDialog.close());
+  $("slot-add").addEventListener("click", () => {
+    $("c-slots").insertAdjacentHTML("beforeend", slotRow({ day: 0, start: "09:00" }));
+    $("c-slots").lastElementChild.querySelector("select").focus();
+  });
+
+  function moveRow(e, rowSelector) {
+    const row = e.target.closest(rowSelector);
+    if (!row) return;
+    if (e.target.closest("[data-remove]")) { row.remove(); return; }
+    if (e.target.closest("[data-up]") && row.previousElementSibling) { row.parentNode.insertBefore(row, row.previousElementSibling); row.querySelector("[data-up]").focus(); }
+    if (e.target.closest("[data-down]") && row.nextElementSibling) { row.parentNode.insertBefore(row.nextElementSibling, row); row.querySelector("[data-down]").focus(); }
+  }
+  $("c-slots").addEventListener("click", e => moveRow(e, ".slot-row"));
+
+  $("cat-delete").addEventListener("click", () => {
+    const b = $("cat-delete"), used = Number(b.dataset.used);
+    if (!b.classList.contains("armed")) {
+      b.classList.add("armed");
+      b.textContent = used ? t("catDeleteSure", { n: used }) : t("sure");
+      return;
+    }
+    state.cats = cats().filter(c => c.id !== editingCat.id);
+    catDialog.close();
+    commit();
+    toast(t("catDeleted"));
+  });
+
+  $("cat-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const name = $("c-name").value.trim();
+    if (!name) { $("c-name").focus(); return; }
+    const goalMin = Math.max(0, Math.min(14, parseInt($("c-min").value, 10) || 0));
+    const goalMax = Math.max(goalMin, Math.min(14, parseInt($("c-max").value, 10) || 0));
+    const slots = [...$("c-slots").querySelectorAll(".slot-row")].map(r => ({ day: Number(r.querySelector("select").value), start: r.querySelector("input").value || "09:00" }));
+    const parts = $("c-parts").value.split("\n").map(l => l.trim()).filter(Boolean).map(l => {
+      const i = l.indexOf(":");
+      return i > -1 ? { name: l.slice(0, i).trim(), tip: l.slice(i + 1).trim() } : { name: l, tip: "" };
+    }).filter(p => p.name && p.name !== "Mix");
+    const checked = document.querySelector('input[name="c-color"]:checked');
+    const c = normCat({
+      id: editingCat ? editingCat.id : "c" + uid(),
+      name, title: $("c-title").value.trim(), color: checked ? checked.value : "grey",
+      goalMin, goalMax, length: Math.max(5, parseInt($("c-length").value, 10) || 60),
+      allDay: $("c-allday").checked, wholeDay: $("c-whole").checked, once: $("c-once").checked,
+      slots, parts, hint: $("c-hint").value.trim(), doneHint: $("c-done").value.trim()
+    });
+    const list = cats();
+    state.cats = editingCat ? list.map(x => x.id === c.id ? c : x) : [...list, c];
+    catDialog.close();
+    commit();
+    toast(t(editingCat ? "catSaved" : "catAdded"));
+  });
+
+  // Day notes
+
+  function editNote(btn) {
+    const i = Number(btn.dataset.note);
+    pauseWeekRender = true;
+    const input = document.createElement("input");
+    input.className = "note-input";
+    input.id = "note-input-" + i;
+    input.maxLength = 80;
+    input.value = noteFor(i);
+    input.placeholder = t("notePh");
+    input.setAttribute("aria-label", t("noteAria", { day: dayName(i) }));
+    btn.replaceWith(input);
+    input.focus();
+    input.select();
+    let finished = false;
+    const finish = keep => {
+      if (finished) return;
+      finished = true;
+      pauseWeekRender = false;
+      if (keep && input.value.trim() !== noteFor(i)) {
+        const notes = Array.from({ length: 7 }, (_, k) => noteFor(k));
+        notes[i] = input.value.trim();
+        state.notes = notes;
+        save();
+      }
+      render();
+    };
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") { e.preventDefault(); finish(true); }
+      if (e.key === "Escape") finish(false);
+    });
+    input.addEventListener("blur", () => finish(true));
+  }
+
+  // Drag a task to another day (mouse and touch)
+
+  let drag = null;
+
+  function moveTask(id, from, to) {
+    const it = state.items.find(x => x.id === id);
+    if (!it || from === to) return;
+    const day = dayInText(weekday(parseDate(to)));
+    if (it.repeat === "weekly") {
+      const data = copy(it);
+      data.skipDates = [...new Set([...(it.skipDates || []), from])];
+      updateTask(it.id, data);
+      addTask({ title: it.title, cat: it.cat, part: it.part || null, start: it.start, end: it.end, allDay: !!it.allDay, note: it.note || "",
+        repeat: "none", date: to, weekday: null, startDate: null, done: false, doneDates: [], skipDates: [], createdAt: new Date().toISOString() });
+      toast(t("movedOnce", { day }));
+    } else {
+      const data = copy(it);
+      data.date = to;
+      updateTask(it.id, data);
+      toast(t("moved", { day }));
+    }
+    save();
+  }
+
+  function dayAt(x, y) { const el = document.elementFromPoint(x, y); return el ? el.closest(".day") : null; }
+
+  $("week").addEventListener("pointerdown", e => {
+    const grip = e.target.closest("[data-grip]");
+    if (!grip || (e.pointerType === "mouse" && e.button !== 0)) return;
+    e.preventDefault();
+    const row = grip.closest(".task"), card = row.querySelector(".card"), rect = card.getBoundingClientRect();
+    const ghost = card.cloneNode(true);
+    ghost.classList.add("ghost");
+    ghost.removeAttribute("data-edit");
+    ghost.style.width = rect.width + "px";
+    ghost.style.left = rect.left + "px";
+    ghost.style.top = rect.top + "px";
+    document.body.appendChild(ghost);
+    document.body.classList.add("is-dragging");
+    row.classList.add("dragging");
+    drag = { id: grip.dataset.grip, from: grip.dataset.date, ghost, row, dx: e.clientX - rect.left, dy: e.clientY - rect.top, over: null };
+    try { grip.setPointerCapture(e.pointerId); } catch (err) { /* not supported */ }
+    pauseWeekRender = true;
+  });
+
+  document.addEventListener("pointermove", e => {
+    if (!drag) return;
+    e.preventDefault();
+    drag.ghost.style.left = (e.clientX - drag.dx) + "px";
+    drag.ghost.style.top = (e.clientY - drag.dy) + "px";
+    const over = dayAt(e.clientX, e.clientY);
+    if (over !== drag.over) {
+      if (drag.over) drag.over.classList.remove("drop");
+      drag.over = over;
+      if (over) over.classList.add("drop");
+    }
+    if (e.clientY < 70) window.scrollBy(0, -14);
+    else if (e.clientY > window.innerHeight - 70) window.scrollBy(0, 14);
+  }, { passive: false });
+
+  function endDrag(cancel) {
+    if (!drag) return;
+    const d = drag;
+    drag = null;
+    d.ghost.remove();
+    d.row.classList.remove("dragging");
+    document.body.classList.remove("is-dragging");
+    if (d.over) d.over.classList.remove("drop");
+    pauseWeekRender = false;
+    if (!cancel && d.over && d.over.dataset.day !== d.from) moveTask(d.id, d.from, d.over.dataset.day);
+    render();
+  }
+  document.addEventListener("pointerup", () => endDrag(false));
+  document.addEventListener("pointercancel", () => endDrag(true));
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && drag) endDrag(true); });
+
+  // Week interactions
+
+  $("week").addEventListener("click", e => {
+    const note = e.target.closest("[data-note]");
+    if (note) { editNote(note); return; }
+    const add = e.target.closest("[data-add]");
+    if (add) { openTask(null, add.dataset.add); return; }
+    const card = e.target.closest("[data-edit]");
+    if (card) { const it = state.items.find(x => x.id === card.dataset.edit); if (it) openTask(it, card.dataset.date); }
+  });
+
+  $("week").addEventListener("change", e => {
+    const box = e.target.closest("[data-done]");
+    if (!box) return;
+    const it = state.items.find(x => x.id === box.dataset.done);
+    if (!it) return;
+    const data = copy(it), day = box.dataset.date;
+    if (it.repeat === "weekly") {
+      const set = new Set(it.doneDates || []);
+      if (box.checked) set.add(day); else set.delete(day);
+      data.doneDates = [...set];
+    } else data.done = box.checked;
+    updateTask(it.id, data);
+    commit();
+  });
+
+  $("prev").addEventListener("click", () => { weekStart = addDays(weekStart, -7); render(); });
+  $("next").addEventListener("click", () => { weekStart = addDays(weekStart, 7); render(); });
+  $("today").addEventListener("click", () => { weekStart = mondayOf(new Date()); render(); });
+  $("new-task").addEventListener("click", () => {
+    const now = new Date();
+    openTask(null, iso(now >= weekStart && now < addDays(weekStart, 7) ? now : weekStart));
+  });
+  $("welcome-close").addEventListener("click", () => { state.welcomeSeen = true; commit(); });
+
+  // Auto plan: uses each category's weekly goal and preferred times
+
+  function buildPlan(allowPast) {
+    const now = new Date(), todayKey = iso(now), nowMin = now.getHours() * 60 + now.getMinutes();
+    const day = i => addDays(weekStart, i), plan = [], summary = [];
+    const on = i => { const key = iso(day(i)); return [...tasksOn(day(i)), ...plan.filter(p => p.date === key)]; };
+    const list = cats();
+    const order = [...list.filter(c => c.wholeDay), ...list.filter(c => !c.wholeDay)].filter(c => c.goalMax > 0 && c.slots.length);
+
+    for (const c of order) {
+      let planned = 0;
+      const usedDays = [];
+      for (let i = 0; i < 7; i++) { const n = on(i).filter(x => x.cat === c.id).length; planned += n; if (n) usedDays.push(i); }
+      if (planned >= c.goalMax) continue;
+      let need = (planned < c.goalMin ? c.goalMin : planned + 1) - planned;
+      const picked = [], partsUsed = [];
+
+      // First pass keeps a free day between sessions, second pass fills the rest
+      for (const pass of [0, 1]) {
+        for (const slot of c.slots) {
+          if (need <= 0) break;
+          const i = slot.day, key = iso(day(i)), tasks = on(i);
+          const start = c.allDay ? "00:00" : slot.start;
+          const end = c.allDay ? "23:59" : clock(minutes(slot.start) + (c.length || 60));
+          if (!allowPast && (key < todayKey || (key === todayKey && (c.allDay || c.wholeDay || minutes(start) <= nowMin)))) continue;
+          if (picked.includes(i)) continue;
+          if (c.once && tasks.some(x => x.cat === c.id)) continue;
+          if (pass === 0 && [...picked, ...usedDays].some(k => Math.abs(k - i) === 1)) continue;
+          if (c.wholeDay || c.allDay) { if (tasks.length) continue; }
+          else {
+            if (tasks.some(x => catById(x.cat).wholeDay || x.allDay)) continue;
+            if (tasks.some(x => minutes(x.start) < minutes(end) && minutes(x.end) > minutes(start))) continue;
+          }
+          const part = nextPart(c, partsUsed);
+          plan.push({ title: part ? c.name + ": " + part.toLowerCase() : (c.title || c.name), cat: c.id, part, date: key, start, end,
+            allDay: !!c.allDay, repeat: "none", weekday: null, startDate: null, done: false, doneDates: [], skipDates: [], note: "",
+            createdAt: now.toISOString() });
+          picked.push(i);
+          if (part) partsUsed.push(part);
+          need--;
+        }
+      }
+      if (picked.length) {
+        summary.push(picked.length === 1 && c.goalMax === 1
+          ? t("plannedOne", { name: c.name, day: dayInText(picked[0]) })
+          : t("plannedMany", { n: picked.length, name: c.name }));
+      }
+    }
+    return { plan, summary };
+  }
+
+  $("auto-plan").addEventListener("click", () => {
+    const { plan, summary } = buildPlan();
+    if (!plan.length) { toast(t("nothingToPlan")); return; }
+    plan.forEach(addTask);
+    state.welcomeSeen = true;
+    commit();
+    toast(t("planned", { list: summary.join(", ") }));
+  });
+
+  // Example week for first-time visitors
+
+  function seedExamples() {
+    const startDate = iso(weekStart);
+    cats().filter(c => !c.goalMax && c.slots.length).forEach(c => {
+      c.slots.forEach(slot => addTask({ title: c.title || c.name, cat: c.id, part: null, allDay: !!c.allDay,
+        start: slot.start, end: clock(minutes(slot.start) + (c.length || 60)), note: "", repeat: "weekly", date: null,
+        weekday: slot.day, startDate, done: false, doneDates: [], skipDates: [], example: true, createdAt: new Date().toISOString() }));
+    });
+    buildPlan(true).plan.forEach(it => addTask(Object.assign(it, { example: true })));
+    state.welcomeSeen = false;
+    save();
+  }
+
+  function onlyExamples() { return state.items.length > 0 && state.items.every(it => it.example); }
+
+  $("clear-examples").addEventListener("click", () => {
+    state.items = state.items.filter(it => !it.example);
+    state.welcomeSeen = true;
+    commit();
+    toast(t("examplesCleared"));
+  });
+
+  // Rules
+
+  function ruleRow(r) {
+    const n = rowSeq++;
+    return `<div class="rule-row">
+      <input id="rule-title-${n}" type="text" maxlength="60" placeholder="${esc(t("ruleHeadPh"))}" value="${esc(r.title || "")}" aria-label="${esc(t("ruleHeadPh"))}">
+      <div class="icon-btns">
+        <button type="button" class="icon-btn" data-up aria-label="${esc(t("up"))}">${ICON_UP}</button>
+        <button type="button" class="icon-btn" data-down aria-label="${esc(t("down"))}">${ICON_DOWN}</button>
+        <button type="button" class="icon-btn del" data-remove aria-label="${esc(t("remove"))}">${ICON_TRASH}</button>
+      </div>
+      <textarea id="rule-text-${n}" rows="2" maxlength="500" placeholder="${esc(t("ruleTextPh"))}" aria-label="${esc(t("ruleTextPh"))}">${esc(r.text || "")}</textarea>
+    </div>`;
+  }
+  function openRules() {
+    const r = state.rules || L().defaults.rules;
+    rulesOpen = true;
+    $("rule-heading").value = r.heading || "";
+    $("rule-rows").innerHTML = r.items.map(ruleRow).join("");
+    $("rules-view").hidden = true;
+    $("rules-form").hidden = false;
+    $("rules-edit").hidden = true;
+  }
+  function closeRules() {
+    rulesOpen = false;
+    $("rules-view").hidden = false;
+    $("rules-form").hidden = true;
+    $("rules-edit").hidden = false;
+    renderRules();
+  }
+  $("rules-edit").addEventListener("click", openRules);
+  $("rules-cancel").addEventListener("click", closeRules);
+  $("rule-add").addEventListener("click", () => {
+    $("rule-rows").insertAdjacentHTML("beforeend", ruleRow({ title: "", text: "" }));
+    $("rule-rows").lastElementChild.querySelector("input").focus();
+  });
+  $("rule-rows").addEventListener("click", e => moveRow(e, ".rule-row"));
+  $("rules-save").addEventListener("click", () => {
+    const items = [...$("rule-rows").querySelectorAll(".rule-row")]
+      .map(r => ({ title: r.querySelector("input").value.trim(), text: r.querySelector("textarea").value.trim() }))
+      .filter(r => r.title || r.text);
+    state.rules = { heading: $("rule-heading").value.trim() || L().defaults.rules.heading, items };
+    closeRules();
+    commit();
+    toast(t("rulesSaved"));
+  });
+
+  // Backup, restore and reset
+
+  $("export").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "weekplanner-backup-" + iso(new Date()) + ".json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+
+  $("import-file").addEventListener("change", e => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (!data || !Array.isArray(data.items)) throw new Error("invalid");
+        state = Object.assign(blankState(data.lang === "en" ? "en" : "nl"), {
+          items: data.items,
+          cats: Array.isArray(data.cats) ? data.cats : null,
+          rules: data.rules && Array.isArray(data.rules.items) ? data.rules : null,
+          notes: Array.isArray(data.notes) ? data.notes : null,
+          welcomeSeen: true
+        });
+        applyStaticText();
+        commit();
+        toast(t("imported"));
+      } catch (err) {
+        toast(t("importFail"));
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  $("reset").addEventListener("click", () => {
+    const b = $("reset");
+    if (!b.classList.contains("armed")) {
+      b.classList.add("armed");
+      b.textContent = t("resetSure");
+      setTimeout(() => { b.classList.remove("armed"); b.textContent = t("reset"); }, 4000);
+      return;
+    }
+    state = blankState(state.lang);
+    b.classList.remove("armed");
+    b.textContent = t("reset");
+    commit();
+    toast(t("resetDone"));
+  });
+
+  // Language
+
+  document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => {
+    if (state.lang === b.dataset.lang) return;
+    const redoExamples = onlyExamples() && !state.welcomeSeen;
+    state.lang = b.dataset.lang;
+    if (redoExamples) { state.items = []; seedExamples(); }
+    const url = new URL(location.href);
+    url.searchParams.delete("lang");
+    history.replaceState(null, "", url);
+    applyStaticText();
+    commit();
+  }));
+
+  // Print on one A4 page
+
+  function fitToPage() {
+    const wrap = document.querySelector(".wrap");
+    wrap.style.zoom = "";
+    const maxHeight = 190 * 96 / 25.4;
+    const height = wrap.scrollHeight;
+    if (height > maxHeight) wrap.style.zoom = (maxHeight / height).toFixed(3);
+  }
+  window.addEventListener("beforeprint", () => { document.body.classList.add("printing"); fitToPage(); });
+  window.addEventListener("afterprint", () => { document.body.classList.remove("printing"); document.querySelector(".wrap").style.zoom = ""; });
+  $("print").addEventListener("click", () => window.print());
+
+  // Start
+
+  if (firstVisit) seedExamples();
+  applyStaticText();
+  render();
+})();
+</script>
+</body>
+</html>
