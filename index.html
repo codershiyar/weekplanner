@@ -280,19 +280,33 @@ form.edit h3 { font-size: 14px; font-weight: 600; margin: 6px 0 -4px; }
 /* Print: one A4 page in landscape */
 @page { size: A4 landscape; margin: 10mm; }
 body.printing { background: #fff; color: #16161D; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-body.printing .wrap { width: 277mm; max-width: none; padding: 0; gap: 10px; }
-body.printing .nav, body.printing .welcome, body.printing #goals, body.printing #categories, body.printing #data,
-body.printing .footer, body.printing .add, body.printing .grip, body.printing .note-btn svg, body.printing .toast, body.printing dialog { display: none !important; }
-body.printing .week { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
-body.printing .day, body.printing .panel { box-shadow: none; border-color: #DDDDE3; background: #fff; opacity: 1; padding: 8px; border-radius: 10px; }
-body.printing .day { min-height: 110mm; }
-body.printing .task { padding: 5px 6px; }
-body.printing .title { font-size: 11px; }
-body.printing .tip, body.printing .time, body.printing .task-head .cat { font-size: 9px; }
-body.printing .check { width: 13px; height: 13px; border-color: #9A9AA8; }
-body.printing .panel h2 { font-size: 14px; }
-body.printing .rule-list { gap: 6px; }
-body.printing .rule-list li { font-size: 10px; padding: 6px 8px; }
+body.printing .wrap { width: 277mm; max-width: none; padding: 0; gap: 8px; }
+body.printing .nav, body.printing .welcome, body.printing #goals, body.printing #categories, body.printing #data, body.printing #rules-edit,
+body.printing .footer, body.printing .add, body.printing .grip, body.printing .tag-today, body.printing .note-btn svg, body.printing .toast, body.printing dialog { display: none !important; }
+body.printing .top > div:first-child { display: flex; align-items: baseline; gap: 4px; }
+body.printing h1 { font-size: 13px; margin: 0; letter-spacing: 0; }
+body.printing h1::after { content: ","; }
+body.printing .sub-h { font-size: 13px; color: #16161D; font-weight: 600; }
+body.printing .week { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+body.printing .day, body.printing .panel { box-shadow: none; border: 1px solid #C9C9D2; background: #fff; opacity: 1; padding: 7px; border-radius: 8px; gap: 6px; }
+body.printing .day { min-height: 124mm; }
+body.printing .day.today .dnum { color: #16161D; }
+body.printing .dnum { font-size: 18px; }
+body.printing .dname { font-size: 10px; margin-top: 1px; }
+body.printing .list { gap: 5px; }
+body.printing .task { padding: 4px 5px 5px; border: 1px solid #D5D5DD; border-radius: 6px; }
+body.printing .task-head { min-height: 18px; gap: 5px; }
+body.printing .title { font-size: 10.5px; }
+body.printing .tip, body.printing .time, body.printing .task-head .cat { font-size: 8.5px; }
+body.printing .tip { -webkit-line-clamp: 2; }
+body.printing .check { width: 12px; height: 12px; border: 1.5px solid #77778A; border-radius: 3px; }
+body.printing .note-btn { font-size: 9px; padding: 5px 2px 0; }
+body.printing .empty { font-size: 9px; }
+body.printing .panel { gap: 6px; }
+body.printing .panel h2 { font-size: 12px; }
+body.printing .rule-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+body.printing .rule-list li { font-size: 8.5px; padding: 4px 6px; line-height: 1.35; }
+body.printing .rule-list li > strong:first-child { font-size: 9.5px; margin-bottom: 0; }
 </style>
 </head>
 <body>
@@ -1562,8 +1576,9 @@ body.printing .rule-list li { font-size: 10px; padding: 6px 8px; }
   function fitToPage() {
     const wrap = document.querySelector(".wrap");
     wrap.style.zoom = "";
-    const maxHeight = 190 * 96 / 25.4;
-    const height = wrap.scrollHeight;
+    // Leave room for the header and footer some browsers add to printed pages
+    const maxHeight = 176 * 96 / 25.4;
+    const height = wrap.getBoundingClientRect().height;
     if (height > maxHeight) wrap.style.zoom = (maxHeight / height).toFixed(3);
   }
   window.addEventListener("beforeprint", () => {
