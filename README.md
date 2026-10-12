@@ -1,10 +1,15 @@
 # Weekplanner
 
-Free, private week planner in your browser. Set weekly goals, auto plan your week and print it. No account needed.
+Free weekly planner that runs in your browser. Plan work, study, workouts and rest days, set weekly goals and let it fill your week. Drag and drop, recurring tasks and print to one A4 page. No account, no tracking, your data stays on your device.
 
 ### [Open Weekplanner](https://codershiyar.github.io/weekplanner/)
 
 English version: [codershiyar.github.io/weekplanner/?lang=en](https://codershiyar.github.io/weekplanner/?lang=en)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="screenshots/desktop-dark.png">
+  <img src="screenshots/desktop.png" alt="Weekplanner week view with weekly goals, progress and tasks for each day" width="100%">
+</picture>
 
 [Nederlands staat hieronder](#nederlands)
 
@@ -18,6 +23,8 @@ It works right away in your browser. There is nothing to install and no account 
 
 ## Getting started
 
+<img src="screenshots/mobile.png" alt="Weekplanner on a phone" width="240" align="right">
+
 1. **Open the planner** with the link above. You will see an example week, so you can see how it works.
 2. **Make it yours.** Click a category under *Categories* to change its name, color, weekly goal and preferred times. Add your own with *New category*.
 3. **Clear the examples** with the button at the top when you are ready, or keep them and change them.
@@ -25,6 +32,8 @@ It works right away in your browser. There is nothing to install and no account 
 5. **Check off tasks** as you go and watch your progress for the week.
 
 Tip: add the page to your home screen or bookmarks, so it is always one tap away.
+
+<br clear="right">
 
 ## What you can do
 
@@ -40,7 +49,7 @@ Tip: add the page to your home screen or bookmarks, so it is always one tap away
 | Your rules | A list of your own planning rules, with bold text where you want it |
 | Print | Your whole week on one A4 page in landscape, with boxes to tick on paper |
 | Backup | Download your planning as a file and restore it on another device |
-| Dark mode | Follows the setting of your device |
+| Light and dark mode | Switch with one tap, or let it follow your device |
 | Two languages | Dutch and English, switch at the top of the page |
 
 ## Your privacy
@@ -76,6 +85,11 @@ Gratis en privé weekplanner in je browser. Stel weekdoelen in, laat je week sli
 
 ### [Open Weekplanner](https://codershiyar.github.io/weekplanner/)
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="screenshots/desktop-dark.png">
+  <img src="screenshots/desktop.png" alt="Weekplanner weekoverzicht met weekdoelen, voortgang en taken per dag" width="100%">
+</picture>
+
 ### Wat is het?
 
 Met Weekplanner plan je je week in één duidelijk overzicht. Zet je werk, studie, sport en vrije tijd erin, kies per onderdeel een doel, en laat de planner een goede plek voor alles vinden.
@@ -103,7 +117,7 @@ Tip: zet de pagina op je beginscherm of bij je favorieten, dan heb je hem altijd
 - Dagnotities en een lijst met je eigen regels
 - Je week printen op één A4 liggend
 - Back-up downloaden en terugzetten
-- Lichte en donkere modus, in het Nederlands en Engels
+- Lichte en donkere modus met één klik, in het Nederlands en Engels
 
 ### Je privacy
 
